@@ -9,6 +9,7 @@ import { StatsCards } from '@/components/StatsCards';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Heart, Gift, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { OnlineVisitors } from '@/components/OnlineVisitors';
 
 export default function AdminPage() {
   const { produtos, loading, error, fetchProdutos, toggleStatus } = useProdutos();
@@ -100,6 +101,7 @@ export default function AdminPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        <OnlineVisitors />
         {/* Stats */}
         <div className="mb-8 animate-fade-in-up">
           <StatsCards produtos={produtos} />
