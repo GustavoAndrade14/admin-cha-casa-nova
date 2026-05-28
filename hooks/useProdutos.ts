@@ -33,7 +33,7 @@ export function useProdutos() {
             setLoading(true);
             setError(null);
 
-            const response = await axios.get('http://cha-casa-nova-back.vercel.app:4000/api/produtos', {
+            const response = await axios.get('http://cha-casa-nova-back.vercel.app/api/produtos', {
                 signal: controller.signal
             });
 
@@ -75,7 +75,7 @@ export function useProdutos() {
         );
 
         try {
-            const response = await axios.patch(`http://cha-casa-nova-back.vercel.app:4000/api/produtos/${id}/toggle`);
+            const response = await axios.patch(`http://cha-casa-nova-back.vercel.app/api/produtos/${id}/toggle`);
 
             if (response.data.success) {
                 toast.success(`Status atualizado!`, {
@@ -110,7 +110,7 @@ export function useProdutos() {
         const previousProdutos = [...produtos];
 
         try {
-            const response = await axios.patch('http://cha-casa-nova-back.vercel.app:4000/api/produtos/batch/atualizar', {
+            const response = await axios.patch('http://cha-casa-nova-back.vercel.app/api/produtos/batch/atualizar', {
                 updates
             });
 
