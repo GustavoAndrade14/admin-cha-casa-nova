@@ -24,11 +24,6 @@ export default function AdminPage() {
     });
   }, []);
 
-  const handleViewDetails = (produto: Produto) => {
-    setSelectedProduto(produto);
-    setModalOpen(true);
-  };
-
   const handleToggleStatus = async (id: number, currentStatus: boolean) => {
     await toggleStatus(id, currentStatus);
   };
