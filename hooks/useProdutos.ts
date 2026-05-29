@@ -59,6 +59,93 @@ export function useProdutos() {
         }
     }, []);
 
+    const criarProduto = useCallback(async (produtoData: Omit<Produto, 'id' | 'created_at'>) => {
+        const toastId = toast.loading('Criando produto...', {
+            description: 'Aguarde enquanto salvamos o produto',
+        });
+
+        try {
+            const response = await axios.post('https://cha-casa-nova-back.vercel.app/api/produtos', produtoData);
+
+            if (response.data.success) {
+                await fetchProdutos();
+                toast.success('Produto criado!', {
+                    id: toastId,
+                    description: `${produtoData.name} foi adicionado com sucesso`,
+                    icon: '🎁',
+                    duration: 3000,
+                });
+                return response.data.data;
+            }
+        } catch (err) {
+            console.error('Erro ao criar produto:', err);
+            toast.error('Erro!', {
+                id: toastId,
+                description: 'Não foi possível criar o produto',
+                duration: 4000,
+            });
+            return null;
+        }
+    }, [fetchProdutos]);
+
+    const deletarProduto = useCallback(async (id: number, nomeProduto: string) => {
+        const toastId = toast.loading('Deletando produto...', {
+            description: `Removendo ${nomeProduto}`,
+        });
+
+        try {
+            const response = await axios.delete(`https://cha-casa-nova-back.vercel.app/api/produtos/${id}`);
+
+            if (response.data.success) {
+                await fetchProdutos();
+                toast.success('Produto removido!', {
+                    id: toastId,
+                    description: `${nomeProduto} foi removido da lista`,
+                    icon: '🗑️',
+                    duration: 3000,
+                });
+                return true;
+            }
+        } catch (err) {
+            console.error('Erro ao deletar produto:', err);
+            toast.error('Erro!', {
+                id: toastId,
+                description: 'Não foi possível remover o produto',
+                duration: 4000,
+            });
+            return false;
+        }
+    }, [fetchProdutos]);
+
+    const atualizarProduto = useCallback(async (id: number, produtoData: Partial<Produto>) => {
+        const toastId = toast.loading('Atualizando produto...', {
+            description: 'Salvando alterações',
+        });
+
+        try {
+            const response = await axios.put(`https://cha-casa-nova-back.vercel.app/api/produtos/${id}`, produtoData);
+
+            if (response.data.success) {
+                await fetchProdutos();
+                toast.success('Produto atualizado!', {
+                    id: toastId,
+                    description: 'As alterações foram salvas',
+                    icon: '✏️',
+                    duration: 3000,
+                });
+                return response.data.data;
+            }
+        } catch (err) {
+            console.error('Erro ao atualizar produto:', err);
+            toast.error('Erro!', {
+                id: toastId,
+                description: 'Não foi possível atualizar o produto',
+                duration: 4000,
+            });
+            return null;
+        }
+    }, [fetchProdutos]);
+
     const toggleStatus = useCallback(async (id: number, currentStatus: boolean) => {
         const newStatus = !currentStatus;
 
@@ -162,6 +249,9 @@ export function useProdutos() {
         error,
         fetchProdutos,
         toggleStatus,
-        updateMultipleStatus
+        updateMultipleStatus,
+        criarProduto,
+        deletarProduto,
+        atualizarProduto,
     };
 }

@@ -1,32 +1,52 @@
+// app/page.tsx (admin)
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useProdutos } from '@/hooks/useProdutos';
-import { Produto } from '@/hooks/useProdutos';
+import { useState } from 'react';
+import { useProdutos, Produto } from '@/hooks/useProdutos';
 import { ProdutoCard } from '@/components/ProdutoCard';
-import { ProdutoModal } from '@/components/ProdutoModal';
+import { ProdutoForm } from '@/components/ProdutoForm';
 import { StatsCards } from '@/components/StatsCards';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Heart, Gift, Sparkles } from 'lucide-react';
+import { RefreshCw, Heart, Gift, Sparkles, Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import { OnlineVisitors } from '@/components/OnlineVisitors';
+
+type ProdutoFormData = Omit<Produto, 'id' | 'created_at'>;
 
 export default function AdminPage() {
-  const { produtos, loading, error, fetchProdutos, toggleStatus } = useProdutos();
-  const [selectedProduto, setSelectedProduto] = useState<Produto | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const {
+    produtos,
+    loading,
+    error,
+    fetchProdutos,
+    toggleStatus,
+    criarProduto,
+    deletarProduto,
+    atualizarProduto
+  } = useProdutos();
 
-  useEffect(() => {
-    // Mensagem de boas-vindas
-    toast.success('Bem-vindo ao Painel Admin!', {
-      description: 'Gerencie os produtos da lista de casamento',
-      icon: '🎉',
-      duration: 4000,
-    });
-  }, []);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingProduto, setEditingProduto] = useState<Produto | null>(null);
 
-  const handleToggleStatus = async (id: number, currentStatus: boolean) => {
-    await toggleStatus(id, currentStatus);
+  const handleEdit = (produto: Produto) => {
+    setEditingProduto(produto);
+    setFormOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setEditingProduto(null);
+    setFormOpen(true);
+  };
+
+  const handleSave = async (produtoData: ProdutoFormData) => {
+    if (editingProduto) {
+      await atualizarProduto(editingProduto.id, produtoData);
+    } else {
+      await criarProduto(produtoData);
+    }
+  };
+
+  const handleDelete = async (id: number, nome: string) => {
+    await deletarProduto(id, nome);
   };
 
   const handleRefresh = async () => {
@@ -101,10 +121,20 @@ export default function AdminPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <OnlineVisitors />
         {/* Stats */}
         <div className="mb-8 animate-fade-in-up">
           <StatsCards produtos={produtos} />
+        </div>
+
+        {/* Botão Adicionar */}
+        <div className="mb-6 flex justify-end">
+          <Button
+            onClick={handleAddNew}
+            className="bg-yellow-400 text-black hover:bg-yellow-500"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Adicionar Produto
+          </Button>
         </div>
 
         {/* Products Grid */}
@@ -124,7 +154,9 @@ export default function AdminPage() {
               <ProdutoCard
                 key={produto.id}
                 produto={produto}
-                onToggleStatus={handleToggleStatus}
+                onToggleStatus={toggleStatus}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
               />
             ))}
           </div>
@@ -139,11 +171,13 @@ export default function AdminPage() {
         </p>
       </footer>
 
-      {/* Modal */}
-      <ProdutoModal
-        produto={selectedProduto}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
+      {/* Form Modal */}
+      <ProdutoForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        produto={editingProduto}
+        onSave={handleSave}
+        isEditing={!!editingProduto}
       />
     </div>
   );

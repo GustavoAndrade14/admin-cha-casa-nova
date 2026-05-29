@@ -4,16 +4,18 @@ import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, ShoppingBag } from 'lucide-react';
+import { ExternalLink, ShoppingBag, Edit, Trash2 } from 'lucide-react';
 import { Produto } from '@/hooks/useProdutos';
 import { toast } from 'sonner';
 
 interface ProdutoCardProps {
     produto: Produto;
     onToggleStatus: (id: number, status: boolean) => void;
+    onEdit: (produto: Produto) => void;      // ← Adicionar
+    onDelete: (id: number, nome: string) => void; // ← Adicionar
 }
 
-export function ProdutoCard({ produto, onToggleStatus }: ProdutoCardProps) {
+export function ProdutoCard({ produto, onToggleStatus, onEdit, onDelete }: ProdutoCardProps) {
     const handleToggle = async () => {
         const newStatus = !produto.unavailable;
         const statusText = newStatus ? 'indisponível' : 'disponível';
@@ -24,6 +26,12 @@ export function ProdutoCard({ produto, onToggleStatus }: ProdutoCardProps) {
 
         await onToggleStatus(produto.id, produto.unavailable);
         toast.dismiss(toastId);
+    };
+
+    const handleDelete = () => {
+        if (confirm(`Tem certeza que deseja remover "${produto.name}" da lista?`)) {
+            onDelete(produto.id, produto.name);
+        }
     };
 
     return (
@@ -79,15 +87,38 @@ export function ProdutoCard({ produto, onToggleStatus }: ProdutoCardProps) {
                         </p>
                     </div>
 
-                    {/* Botão Comprar */}
-                    <Button
-                        size="lg"
-                        className="w-full bg-yellow-400 text-black hover:bg-yellow-500 text-base py-6 h-auto font-semibold"
-                        onClick={() => window.open(produto.link, '_blank')}
-                    >
-                        <ExternalLink className="w-5 h-5 mr-2" />
-                        Ver na Loja
-                    </Button>
+                    {/* Botões de ação - Comprar, Editar, Deletar */}
+                    <div className="flex gap-2">
+                        {/* Botão Comprar */}
+                        <Button
+                            size="default"
+                            className="flex-1 bg-yellow-400 text-black hover:bg-yellow-500"
+                            onClick={() => window.open(produto.link, '_blank')}
+                        >
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Ver na Loja
+                        </Button>
+
+                        {/* Botão Editar */}
+                        <Button
+                            size="default"
+                            variant="outline"
+                            className="border-yellow-400/30 text-yellow-400 hover:bg-yellow-400/10"
+                            onClick={() => onEdit(produto)}
+                        >
+                            <Edit className="w-4 h-4" />
+                        </Button>
+
+                        {/* Botão Deletar */}
+                        <Button
+                            size="default"
+                            variant="destructive"
+                            className="bg-red-600/20 text-red-400 hover:bg-red-600/30 border border-red-500/30"
+                            onClick={handleDelete}
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </Button>
+                    </div>
 
                     {/* Status Toggle - Versão Centralizada e Maior */}
                     <div className="flex flex-col items-center justify-center pt-4 pb-2 border-t border-gray-700">
@@ -96,8 +127,10 @@ export function ProdutoCard({ produto, onToggleStatus }: ProdutoCardProps) {
                         <div className="flex items-center justify-center gap-6 w-full">
                             {/* Disponível */}
                             <div className="flex flex-col items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full ${!produto.unavailable ? 'bg-green-400 animate-pulse' : 'bg-gray-600'}`} />
-                                <span className={`text-sm font-medium ${!produto.unavailable ? 'text-green-400' : 'text-gray-500'}`}>
+                                <div className={`w-3 h-3 rounded-full ${!produto.unavailable ? 'bg-green-400 animate-pulse' : 'bg-gray-600'
+                                    }`} />
+                                <span className={`text-sm font-medium ${!produto.unavailable ? 'text-green-400' : 'text-gray-500'
+                                    }`}>
                                     Disponível
                                 </span>
                             </div>
@@ -128,8 +161,10 @@ export function ProdutoCard({ produto, onToggleStatus }: ProdutoCardProps) {
 
                             {/* Indisponível */}
                             <div className="flex flex-col items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full ${produto.unavailable ? 'bg-red-400 animate-pulse' : 'bg-gray-600'}`} />
-                                <span className={`text-sm font-medium ${produto.unavailable ? 'text-red-400' : 'text-gray-500'}`}>
+                                <div className={`w-3 h-3 rounded-full ${produto.unavailable ? 'bg-red-400 animate-pulse' : 'bg-gray-600'
+                                    }`} />
+                                <span className={`text-sm font-medium ${produto.unavailable ? 'text-red-400' : 'text-gray-500'
+                                    }`}>
                                     Indisponível
                                 </span>
                             </div>
